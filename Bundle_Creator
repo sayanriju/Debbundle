@@ -1,0 +1,45 @@
+#!/bin/bash
+echo "  =======   Welcome to Deb Bundle Creator      ========"
+
+FULLFILENAME=$1
+properextension="deb_bundle"
+
+
+if [ -z "$FULLFILENAME" ]
+then
+  echo "Please enter a packages name"
+  exit 1;
+else
+  echo "          Welcome to Bundel"
+fi
+
+
+
+
+
+ALLPACKAGES=$@
+
+
+echo $ALLVAR
+
+## moving old archives to new directory  
+
+LocalDir=./$FULLFILENAME
+
+mkdir -p $LocalDir
+mkdir -p $LocalDir/partial
+
+
+sudo apt-get -o dir::cache::archives="$LocalDir" install $ALLPACKAGES
+
+### zip them into a bundle
+cd $LocalDir
+zip $FULLFILENAME.deb_bundle ./*.deb
+mv $FULLFILENAME.deb_bundle ..
+cd ..
+### clear the local files
+
+#rm -rf $LocalDir
+
+exit 0
+
