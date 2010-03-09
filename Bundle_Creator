@@ -34,12 +34,12 @@ sudo apt-get -o dir::cache::archives="$LocalDir" install $ALLPACKAGES
 
 ### zip them into a bundle
 cd $LocalDir
+sudo rm lock
 zip $FULLFILENAME.deb_bundle ./*.deb
-mv $FULLFILENAME.deb_bundle ..
+mv $FULLFILENAME.deb_bundle ../$FULLFILENAME.`arch`.deb_bundle
 cd ..
 ### clear the local files
 
 #rm -rf $LocalDir
 
 exit 0
-
