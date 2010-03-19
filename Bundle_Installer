@@ -43,7 +43,7 @@ echo " ===========     Now installing $APP_NAME ============="
 TMPDIR=/tmp/BUN/$APP_NAME
 mkdir -p $TMPDIR
 rm -rf  $TMPDIR/*
-unzip $FULLFILENAME -d $TMPDIR
+tar -xvf $FULLFILENAME -C $TMPDIR
 
 
 
