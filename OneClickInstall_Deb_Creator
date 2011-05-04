@@ -1,0 +1,51 @@
+#!/bin/bash
+echo "  =======   Welcome to Deb Bundle Creator      ========"
+
+FULLFILENAME=$1
+
+if [ -z "$FULLFILENAME" ]
+then
+
+cat << EOF
+usage: $0 OutPutFile package-list
+Ex - $0 vim vim-gtk
+
+EOF
+  exit 1;
+fi
+
+
+shift
+ALLPACKAGES=$@
+
+echo "Creating a One Click Installer to install $FULLFILENAME ....................."
+echo "......."
+echo "............."
+echo "....................."
+## moving old archives to new directory  
+
+LocalDir=./$FULLFILENAME
+
+mkdir -p $LocalDir
+mkdir -p $LocalDir/partial
+
+sudo apt-get -y -o dir::cache::archives="$LocalDir"  install --download-only $ALLPACKAGES
+sudo rm $LocalDir/lock
+touch $LocalDir/install.sh
+chmod +x $LocalDir/install.sh
+
+cat << EOF > $LocalDir/install.sh
+#!/bin/bash
+sudo apt-get -o dir::cache::archives=$PWD/$FULLFILENAME install $ALLPACKAGES
+echo "......................................!!!!!!!!!!!!..............."
+echo "Press Enter to exit installation ..............."
+read AA
+exit 0
+EOF
+
+
+### makeself this into a bundle
+
+makeself $PWD/$FULLFILENAME $FULLFILENAME.`arch`.OneClickInstall "Installing $FULLFILENAME ..........." ./install.sh
+
+exit 0
