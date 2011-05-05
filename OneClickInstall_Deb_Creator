@@ -15,6 +15,16 @@ EOF
 fi
 
 
+RES=`which makeself > /dev/null;echo $?`
+
+if [ $RES = 1 ]
+then
+	echo "Makeself command was not installed, Please install makeself command"
+	echo "Run following to install makeself"
+	echo "sudo apt-get install makeself"
+	exit 0
+fi
+
 shift
 ALLPACKAGES=$@
 
