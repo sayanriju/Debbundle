@@ -67,9 +67,16 @@ sudo rm $LocalDir/lock
 touch $LocalDir/install.sh
 chmod +x $LocalDir/install.sh
 
+### Fixing QuickFix 
+### Computer which do have have internet cannot run 'apt-get update' and hence apt-get install
+###
+
 cat << EOF > $LocalDir/install.sh
 #!/bin/bash
-sudo apt-get -o dir::cache::archives=\$PWD install $ALLPACKAGES
+#sudo apt-get -o dir::cache::archives=\$PWD install $ALLPACKAGES
+echo "Installation started... We are going to install following packages..............."
+echo "$ALLPACKAGES"
+sudo dpkg -i ./*.deb
 echo "......................................!!!!!!!!!!!!..............."
 echo "Press Enter to exit installation ..............."
 read AA
