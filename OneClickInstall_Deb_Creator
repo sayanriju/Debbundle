@@ -19,8 +19,66 @@
 #	You should have received a copy of the GNU General Public License
 #	along with debbundle.  If not, see <http://www.gnu.org/licenses/>.
 
+########### Function Definitions #############
+TMPDIR="/tmp"
 
+function get_deps()
+{
+	local HOLD=0
+	apt-cache -i depends $@ |
+	while read line;do
+		echo "$line" | egrep -q '(Depends:)'
+		if [ $? -eq 0 ];then
+			echo "$line" | egrep -q '<*>'
+			if [ $? -eq 0 ];then
+				HOLD=1
+				continue
+			else
+				echo "$line" | cut -d' ' -f2
+				HOLD=0
+				continue
+			fi
+		elif [ $HOLD -eq 1 ];then
+			echo "$line" | egrep -q '<*>'
+			if [ $? -ne 0  ];then
+				echo "$line" | egrep -q ':'
+				if [ $? -ne 0 ];then
+					echo "$line" 
+					HOLD=0
+				fi
+			fi
+		else
+			continue
+		fi
+	done
+}
 
+function build_dep_tree()
+{
+    echo "$@" | tr ' ' "\n" |tee "$TMPDIR/tmptree" > "$TMPDIR/tree"
+    local pkgs;
+
+    while [ 1 ];do
+        pkgs=`get_deps $(cat "$TMPDIR/tmptree")`;
+        >"$TMPDIR/tmptree"
+        for pkg in $pkgs;do
+            grep -q $pkg "$TMPDIR/tree"
+            if [ $? -ne 0 ];then
+                echo "$pkg" >> "$TMPDIR/tmptree"
+            fi
+        done
+        if [[ ! -s "$TMPDIR/tmptree" ]];then
+            break;
+        else
+            cat "$TMPDIR/tmptree" >> "$TMPDIR/tree"
+        fi
+    done
+
+    rm -f "$TMPDIR/tmptree"
+    # cat "$TMPDIR/tree" | sort -u
+    # >"$TMPDIR/tree"
+}
+############ End Function Definitions ################
 
 echo "  =======   Welcome to OneClickInstall Deb Creator	  ========"
 
@@ -49,7 +107,12 @@ then
 fi
 
 shift
-ALLPACKAGES=$@
+echo "Building Dependency Tree. This may take some time ....................."
+echo "......."
+echo "............."
+echo "....................."
+build_dep_tree "$@"
+ALLPACKAGES=`cat "$TMPDIR/tree" | sort -u`
 
 echo "Creating a One Click Installer to install $FULLFILENAME ....................."
 echo "......."
